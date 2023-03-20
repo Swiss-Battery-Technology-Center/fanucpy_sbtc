@@ -1,25 +1,12 @@
-# fanucpy: Python package for FANUC industrial robots
+# fanucpy_extended: Python package for FANUC industrial robots with extra features
 
 ## Acknowledgements
-This work was developed at the [Institute for Advanced Manufacturing at the University of Nottingham](https://www.nottingham.ac.uk/ifam/index.aspx) as a part of the [Digital Manufacturing and Design Training Network](https://dimanditn.eu/).
-
-This project has received funding from the European Union’s Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement No 814078.
+This work is fork of [torayeff/fanucpy](https://github.com/torayeff/fanucpy) adopt to projects creating on PAE of WUT.
 
 ## Software contents
 The package consists of two parts: 
 1. Robot interface code written in Python programming language
-2. FANUC robot controller driver (tested with R-30iB Mate Plus Controller) written in KAREL and FANUC teach pendant languages
-
-The communication protocol between the Python package and the FANUC robot controller is depicted below:
-![Communication Protocol](https://github.com/torayeff/fanucpy/raw/main/media/CommProtocol.png)
-
-## Python package installation
-```bash
-pip install fanucpy
-```
-
-## Driver installation
-Follow these [steps](https://github.com/torayeff/fanucpy/blob/main/fanuc.md) to install FANUC driver.
+2. FANUC robot controller driver (tested with R-30iA ver. 7.70) written in KAREL and FANUC teach pendant languages
 
 ## Usage
 ### Connect to a robot:
@@ -28,10 +15,8 @@ from fanucpy import Robot
 
 robot = Robot(
     robot_model="Fanuc",
-    host="192.168.1.100",
+    host="192.168.234.2",
     port=18735,
-    ee_DO_type="RDO",
-    ee_DO_num=7,
 )
 
 robot.connect()
@@ -60,15 +45,6 @@ robot.move(
 )
 ```
 
-### Opening/closing gripper
-```Python
-# open gripper
-robot.gripper(True)
-
-# close gripper
-robot.gripper(False)
-```
-
 ### Querying robot state
 ```python
 # get robot state
@@ -76,44 +52,4 @@ print(f"Current pose: {robot.get_curpos()}")
 print(f"Current joints: {robot.get_curjpos()}")
 print(f"Instantaneous power: {robot.get_ins_power()}")
 print(f"Get gripper state: {robot.get_rdo(7)}")
-```
-
-### Calling external program
-```python
-robot.call_prog(prog_name)
-```
-
-### Get/Set RDO
-```python
-robot.get_rdo(rdo_num=7)
-robot.set_rdo(rdo_num=7, value=True)
-```
-
-## Contributions
-External contributions are welcome!
-
-- Agajan Torayev: Key developer
-- Fan Mo: Support with documentation
-- Michael Yiu: External contributor
-
-
-## RobotApp
-We introduce an experimental feature: Robot Apps. This class facilitates modularity and plug-and-produce functionality. Check the following example apps:
-
-1. [Pick and Place App](examples/PickAndPlaceApp.py)
-1. [Aruco Tracking App](examples/ArucoTrackingApp.py)
-1. [FANUC ChatGPT](examples/fanucpy-gpt/README.MD)
-
-## Citation
-Please use the following to cite if you are using this library in academic publications [Towards Modular and Plug-and-Produce Manufacturing Apps](https://www.sciencedirect.com/science/article/pii/S2212827122004255)
-```
-@article{torayev2022towards,
-  title={Towards Modular and Plug-and-Produce Manufacturing Apps},
-  author={Torayev, Agajan and Mart{\'\i}nez-Arellano, Giovanna and Chaplin, Jack C and Sanderson, David and Ratchev, Svetan},
-  journal={Procedia CIRP},
-  volume={107},
-  pages={1257--1262},
-  year={2022},
-  publisher={Elsevier}
-}
 ```
