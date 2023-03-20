@@ -78,4 +78,4 @@ BEGIN -- Begin main program
     ENDWHILE -- main listening loop
 
     WRITE('PY SERVER finished.', CR)
-END MAPPDK_SERVER
+END PY_SERVER
