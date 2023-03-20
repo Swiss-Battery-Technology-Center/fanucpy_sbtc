@@ -9,8 +9,6 @@ class Robot(ABC):
         robot_model: str,
         host: str,
         port: int = 18375,
-        ee_DO_type: str = None,
-        ee_DO_num: int = None,
         socket_timeout: int = 60,
     ):
         """[summary]
@@ -19,11 +17,6 @@ class Robot(ABC):
             robot_model (str): Robot model: Fanuce, Kuka, etc.
             host (str): IP address of host.
             port (int): Port number. Defaults to 18735.
-            ee_DO_type (str, optional): End-effector digital output type.
-                                        Fanuc used RDO type. Defaults to None.
-                                        Others may use DO type.
-            ee_DO_num (int, optional): End-effector digital output number.
-                                       Defaults to None.
             socket_timeout(int): Socket timeout in seconds. Defaults to 5 seconds.
         """
         super().__init__()
@@ -31,8 +24,6 @@ class Robot(ABC):
         self.robot_model = robot_model
         self.host = host
         self.port = port
-        self.ee_DO_type = ee_DO_type
-        self.ee_DO_num = ee_DO_num
         self.sock_buff_sz = 1024
         self.socket_timeout = socket_timeout
         self.comm_sock = None
@@ -40,7 +31,7 @@ class Robot(ABC):
         self.ERROR_CODE = 1
 
     def __version__(self):
-        print("MAPPDK Robot class v0.1.11")
+        print("Py Robot class v1.0.0")
 
     def handle_response(self, resp: str, verbose: bool = False):
         """Handles response from socket communication.
@@ -208,28 +199,106 @@ class Robot(ABC):
 
         # call send_cmd
         self.send_cmd(cmd)
-
-    def gripper(self, value: bool) -> None:
-        """Opens/closes robot gripper.
+    
+    def circ(
+        self,
+        mid: list,
+        end: list,
+        velocity: int = 25,
+        acceleration: int = 100,
+        cnt_val: int = 0,
+    ) -> None:
+        """Moves robot.
 
         Args:
-            value (boolean): True or False
+            move_type (str): Movement type (joint or pose).
+            vals (list[real]): Position values.
+            velocity (int, optional): Percentage or mm/s. Defaults to 25%.
+            acceleration (int, optional): Percentage or mm/s^2. Defaults to 100%.
+            cnt_val (int, optional): Continuous value for stopping. Defaults to 50.
+            linear (boolean, optioal): Linear movement. Defaults to False.
+
+        Raises:
+            ValueError: raises if movement type is not one of ("movej", "movep")
         """
-        if (self.ee_DO_type is not None) and (self.ee_DO_num is not None):
-            value = "true" if value else "false"
 
-            cmd = ""
-            if self.ee_DO_type == "RDO":
-                cmd = "setrdo"
-            elif self.ee_DO_type == "DO":
-                cmd = "setdo"
+        # prepare velocity. percentage or mm/s
+        # format: aaaa, e.g.: 0001%, 0020%, 3000 mm/s
+        velocity = int(velocity)
+        velocity = f"{velocity:04}"
+
+        # prepare acceleration. percentage or mm/s^2
+        # format: aaaa, e.g.: 0001%, 0020%, 0100 mm/s^2
+        acceleration = int(acceleration)
+        acceleration = f"{acceleration:04}"
+
+        # prepare CNT value
+        # format: aaa, e.g.: 001, 020, 100
+        cnt_val = int(cnt_val)
+        assert 0 <= cnt_val <= 100, "Incorrect CNT value."
+        cnt_val = f"{cnt_val:03}"
+
+        cmd="circ"
+
+        assert len(end) == len(mid), "Length of mid and end should be same"
+        cmd += f":{velocity}:{acceleration}:{cnt_val}:{len(end)}"
+
+        # prepare end
+        for val in end:
+            vs = f"{abs(val):013.6f}"
+            if val >= 0:
+                vs = "+" + vs
             else:
-                raise ValueError("Wrong DO type!")
+                vs = "-" + vs
+            cmd += f":{vs}"
 
-            cmd = cmd + f":{self.ee_DO_num }:{value}"
-            self.send_cmd(cmd)
+        # prepare mid
+        for val in mid:
+            vs = f"{abs(val):013.6f}"
+            if val >= 0:
+                vs = "+" + vs
+            else:
+                vs = "-" + vs
+            cmd += f":{vs}"
+
+        # call send_cmd
+        self.send_cmd(cmd)
+
+    # def gripper(self, value: bool) -> None:
+    #     """Opens/closes robot gripper.
+
+    #     Args:
+    #         value (boolean): True or False
+    #     """
+    #     if (self.ee_DO_type is not None) and (self.ee_DO_num is not None):
+    #         value = "true" if value else "false"
+
+    #         cmd = ""
+    #         if self.ee_DO_type == "RDO":
+    #             cmd = "setrdo"
+    #         elif self.ee_DO_type == "DO":
+    #             cmd = "setdo"
+    #         else:
+    #             raise ValueError("Wrong DO type!")
+
+    #         cmd = cmd + f":{self.ee_DO_num }:{value}"
+    #         self.send_cmd(cmd)
+    #     else:
+    #         raise ValueError("DO type or number is None!")
+
+    def set_do_bool(self, do_num: int, val: bool):
+        """Sets DO value.
+
+        Args:
+            do_num (int): DO number.
+            val (bool): Value.
+        """
+        if val:
+            val = "true"
         else:
-            raise ValueError("DO type or number is None!")
+            val = "false"
+        cmd = f"setdo:{do_num}:{val}"
+        self.send_cmd(cmd)
 
     def get_rdo(self, rdo_num: int):
         """Get RDO value.
@@ -245,7 +314,7 @@ class Robot(ABC):
         rdo_value = int(rdo_value)
         return rdo_value
 
-    def set_rdo(self, rdo_num: int, val: bool):
+    def set_rdo_bool(self, rdo_num: int, val: bool):
         """Sets RDO value.
 
         Args:
@@ -259,7 +328,7 @@ class Robot(ABC):
         cmd = f"setrdo:{rdo_num}:{val}"
         self.send_cmd(cmd)
 
-    def set_sys_var(self, sys_var: str, val: bool):
+    def set_sys_var_bool(self, sys_var: str, val: bool):
         """Sets system variable to True or False.
 
         Args:
