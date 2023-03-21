@@ -711,7 +711,7 @@ BEGIN
     -- Get PR number
     CNV_STR_INT(SUB_STR(cmd, 7, 3), pr_num)
 
-    GET_POS_REG(pr_num, cpos, status)
+    cpos = GET_POS_REG(pr_num, status)
     IF status <> 0 THEN
         resp = '1:PR-was-not-get'
         RETURN(resp)
@@ -757,6 +757,7 @@ VAR
     pose:               XYZWPR
     pval:               REAL
     resp:               STRING[254]
+    start:              INTEGER
 
 CONST
     n_chars = 14
@@ -765,6 +766,8 @@ BEGIN
     CNV_STR_INT(SUB_STR(cmd, 7, 3), pr_num)
 
     CNV_STR_INT(SUB_STR(cmd, 11, 1), nj)
+    
+    start = 7 + 3 + 1 + 1 + 1
 
     -- Read pose values from the cmd string
     pose = CURPOS(0, 0)
