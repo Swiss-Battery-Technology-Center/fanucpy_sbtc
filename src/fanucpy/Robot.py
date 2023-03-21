@@ -264,42 +264,6 @@ class Robot(ABC):
         # call send_cmd
         self.send_cmd(cmd)
 
-    # def gripper(self, value: bool) -> None:
-    #     """Opens/closes robot gripper.
-
-    #     Args:
-    #         value (boolean): True or False
-    #     """
-    #     if (self.ee_DO_type is not None) and (self.ee_DO_num is not None):
-    #         value = "true" if value else "false"
-
-    #         cmd = ""
-    #         if self.ee_DO_type == "RDO":
-    #             cmd = "setrdo"
-    #         elif self.ee_DO_type == "DO":
-    #             cmd = "setdo"
-    #         else:
-    #             raise ValueError("Wrong DO type!")
-
-    #         cmd = cmd + f":{self.ee_DO_num }:{value}"
-    #         self.send_cmd(cmd)
-    #     else:
-    #         raise ValueError("DO type or number is None!")
-
-    def set_do_bool(self, do_num: int, val: bool):
-        """Sets DO value.
-
-        Args:
-            do_num (int): DO number.
-            val (bool): Value.
-        """
-        if val:
-            val = "true"
-        else:
-            val = "false"
-        cmd = f"setdo:{do_num}:{val}"
-        self.send_cmd(cmd)
-
     def get_rdo(self, rdo_num: int):
         """Get RDO value.
 
@@ -340,4 +304,33 @@ class Robot(ABC):
         else:
             val = "F"
         cmd = f"setsysvar:{sys_var}:{val}"
+        self.send_cmd(cmd)
+
+    def get_pr(self, pr_num: int):
+        """Get PR value.
+
+        Args:
+            pr_num (int): PR number.
+
+        Returns:
+            -
+        """
+        cmd = f"getpr:{pr_num:03}"
+        _, pr_str = self.send_cmd(cmd)
+        return pr_str
+    
+    def set_pr(self, pr_num:int, vals: list,):
+
+        cmd = f"setpr:{pr_num:03}:{len(vals)}"
+
+        # prepare joint values
+        for val in vals:
+            vs = f"{abs(val):013.6f}"
+            if val >= 0:
+                vs = "+" + vs
+            else:
+                vs = "-" + vs
+            cmd += f":{vs}"
+
+        # call send_cmd
         self.send_cmd(cmd)
