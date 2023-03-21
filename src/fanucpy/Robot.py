@@ -334,3 +334,16 @@ class Robot(ABC):
 
         # call send_cmd
         self.send_cmd(cmd)
+
+    def get_reg(self, reg_num: int):
+        """Get REG value.
+
+        Args:
+            reg_num (int): REG number.
+
+        Returns:
+            reg_value: REG value.
+        """
+        cmd = f"getreg:{reg_num:03}"
+        _, reg_value = self.send_cmd(cmd)
+        return reg_value

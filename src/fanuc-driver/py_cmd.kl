@@ -813,6 +813,47 @@ BEGIN
 
 END SET_PR
 
+ROUTINE MY_GET_REG(cmd: STRING): STRING
+----------------------------------------------------
+-- Function: Gets robot digital out.
+-- cmd string should follow the below format:
+-- 'getrdo:n'
+-- n: a single digit number
+----------------------------------------------------
+-- Arguments:
+--      cmd [IN]:           command string.
+----------------------------------------------------
+-- Return value: response string.
+----------------------------------------------------
+VAR
+    reg_num:            INTEGER
+    out:            	  STRING[254]
+    real_flag:  	 	  BOOLEAN
+    int_value:           INTEGER
+    real_value:         REAL
+    status:                INTEGER
+BEGIN
+    -- Get REG number
+    CNV_STR_INT(SUB_STR(cmd, 8, 3), reg_num)
+	
+    GET_REG(reg_num, real_flag, int_value, real_value, status)
+     IF status <> 0 THEN
+        resp = '1:REG-was-not-get'
+        RETURN(resp)
+     ENDIF
+    
+    IF real_flag THEN
+    	CNV_REAL_STR(real_value, 8, 3, out)
+    ELSE
+    	CNV_INT_STR(int_value, 8, 0, out)
+    ENDIF
+    
+
+    resp = '0:' + out
+    RETURN(resp)
+
+END MY_GET_REG
+
 
 
 
@@ -903,6 +944,12 @@ BEGIN
     -- getpr: get Position Register
     IF SUB_STR(cmd, 1, 5) = 'getpr' THEN
         resp = GET_PR(cmd)
+        RETURN(TRUE)
+    ENDIF
+    
+    -- getreg: get Register
+    IF SUB_STR(cmd, 1, 6) = 'getreg' THEN
+        resp = MY_GET_REG(cmd)
         RETURN(TRUE)
     ENDIF
 
