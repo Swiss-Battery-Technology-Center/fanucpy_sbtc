@@ -825,6 +825,7 @@ ROUTINE HANDLE_CMD(cmd: STRING;
 -- Return value: BOOLEAN keep or close connection.
 ----------------------------------------------------
 BEGIN
+    WRITE(cmd, CR)
     IF cmd = 'exit' THEN
         resp = '0:success'
         RETURN(FALSE)
