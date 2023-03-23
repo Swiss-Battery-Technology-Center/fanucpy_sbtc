@@ -20,8 +20,11 @@ VAR
     resp:           STRING[254]
     out:            STRING[254]
     cpos:           XYZWPR
+    axis_mask, ot_mask : INTEGER
 BEGIN
-    cpos = CURPOS(0, 0)
+    $UFRAME = $MNUFRAME[1,8]
+    $UTOOL = $MNUTOOL[1,8]
+    cpos = CURPOS(axis_mask, ot_mask)
 
     CNV_REAL_STR(cpos.x, 8, 3, out)
     resp = '0:x=' + out
