@@ -130,8 +130,4 @@ robot.move(
     linear=True,
 )
 
-
-
-
-
 robot.disconnect()
