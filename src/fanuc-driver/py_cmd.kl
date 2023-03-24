@@ -775,7 +775,7 @@ BEGIN
     -- Read pose values from the cmd string
     pose = CURPOS(0, 0)
     FOR i=1 TO nj DO
-        CNV_STR_REAL(SUB_STR(cmd, 13, n_chars), pval)
+        CNV_STR_REAL(SUB_STR(cmd, start, n_chars), pval)
 
         IF i=1 THEN
             pose.x = pval
