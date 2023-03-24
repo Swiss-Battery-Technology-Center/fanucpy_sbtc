@@ -123,6 +123,18 @@ class Robot(ABC):
         _, msg = self.send_cmd(cmd)
         vals = [float(val.split("=")[1]) for val in msg.split(",")]
         return vals
+    
+    def get_lpos(self):
+        """Gets current linear cartesian position of tool center point.
+
+        Returns:
+            list[float]: Current positions XYZWPR.
+        """
+        
+        self.call_prog("PY_POS")
+        msg = self.get_pr(85)
+        vals = [float(val.split("=")[1]) for val in msg.split(",")]
+        return vals
 
     def get_curjpos(self):
         """Gets current joint values of tool center point.
@@ -222,6 +234,10 @@ class Robot(ABC):
             ValueError: raises if movement type is not one of ("movej", "movep")
         """
 
+        # Set mid
+
+        self.set_pr(80,mid)
+
         # prepare velocity. percentage or mm/s
         # format: aaaa, e.g.: 0001%, 0020%, 3000 mm/s
         velocity = int(velocity)
@@ -245,15 +261,6 @@ class Robot(ABC):
 
         # prepare end
         for val in end:
-            vs = f"{abs(val):013.6f}"
-            if val >= 0:
-                vs = "+" + vs
-            else:
-                vs = "-" + vs
-            cmd += f":{vs}"
-
-        # prepare mid
-        for val in mid:
             vs = f"{abs(val):013.6f}"
             if val >= 0:
                 vs = "+" + vs
@@ -347,3 +354,16 @@ class Robot(ABC):
         cmd = f"getreg:{reg_num:03}"
         _, reg_value = self.send_cmd(cmd)
         return reg_value
+    
+    def get_forces(self):
+        """Gets current data from force sensor
+
+        Returns:
+            list[float]: Fx, Fy, Fz
+        """
+        
+        self.call_prog("PY_FORCE")
+        Fx = float(self.get_reg(81))
+        Fy = float(self.get_reg(82))
+        Fz = float(self.get_reg(83))
+        return [Fx,Fy,Fz]

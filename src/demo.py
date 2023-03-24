@@ -3,7 +3,7 @@ from fanucpy import Robot
 
 robot = Robot(
     robot_model="Fanuc",
-    host="127.0.0.1",
+    host="192.168.234.2",
     port=18735,
 )
 
@@ -13,10 +13,14 @@ robot.connect()
 
 orientation = [0,0,0]
 
+
+
 # get robot state
 print("Current poses: ")
 cur_jpos = robot.get_curjpos()
 print(f"Current joints: {cur_jpos}")
+lpos = robot.get_lpos()
+print(f"Current lpos: {lpos}")
 
 print("Setting PR[90] to 1,2,3,...")
 robot.set_pr(90,[1,2,3,4,5,6])
@@ -25,6 +29,7 @@ print(f"Getting PR[91]: {robot.get_pr(91)}")
 
 print(f"Getting R[91]: {robot.get_reg(90)}")
 
+print(robot.get_forces())
 
 # move in joint space
 
@@ -55,6 +60,9 @@ robot.move(
     linear=True,
 )
 
+lpos = robot.get_lpos()
+print(f"Current lpos: {lpos}")
+
 robot.move(
     "pose",
     vals= [0,200,0] + orientation,
@@ -82,12 +90,6 @@ robot.move(
     linear=True,
 )
 
-print("After: ")
-cur_jpos = robot.get_curjpos()
-print(f"Current joints: {cur_jpos}")
-cur_pos = robot.get_curjpos()
-print(f"Current cartesian: {cur_pos}")
-
 robot.circ(
     mid=[-71,71,0] + orientation,
     end=[0,100,0] + orientation,
@@ -111,6 +113,9 @@ robot.circ(
     acceleration=100,
     cnt_val=0,
 )
+
+lpos = robot.get_lpos()
+print(f"Current lpos: {lpos}")
 
 
 robot.circ(

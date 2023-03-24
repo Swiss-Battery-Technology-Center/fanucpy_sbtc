@@ -379,6 +379,7 @@ BEGIN
 END MOVEP
 
 ROUTINE CIRC(cmd: STRING): STRING
+-- UNFORTUNETLY 128 chars is a limit. - must be splited into 2 commands
 ----------------------------------------------------
 -- Function: Move CIRC.
 -- cmd string should follow the below format:
@@ -482,40 +483,15 @@ BEGIN
         start = start + n_chars + 1
     ENDFOR
 
-    mid = CURPOS(0, 0)
-    FOR i=1 TO nj DO
-        CNV_STR_REAL(SUB_STR(cmd, start, n_chars), pval)
-
-        IF i=1 THEN
-            mid.x = pval
-        ENDIF
-
-        IF i=2 THEN
-            mid.y = pval
-        ENDIF
-
-        IF i=3 THEN
-            mid.z = pval
-        ENDIF
-
-        IF i=4 THEN
-            mid.w = pval
-        ENDIF
-
-        IF i=5 THEN
-            mid.p = pval
-        ENDIF
-
-        IF i=6 THEN
-            mid.r = pval
-        ENDIF
-
-        start = start + n_chars + 1
-    ENDFOR
-
     CHECK_EPOS ((pose), $UFRAME, $UTOOL, status)
     IF status <> 0 THEN
         resp = '1:position-is-not-reachable'
+        RETURN(resp)
+    ENDIF
+
+    mid = GET_POS_REG(80, status)
+    IF status <> 0 THEN
+        resp = '1:mid-was-not-get'
         RETURN(resp)
     ENDIF
 
@@ -531,14 +507,6 @@ BEGIN
         resp = '1:PR[81]-was-not-set'
         RETURN(resp)
     ENDIF
-
-    -- Put position to PR[80]
-    SET_POS_REG(80, mid, status)
-    IF status <> 0 THEN
-        resp = '1:PR[80]-was-not-set'
-        RETURN(resp)
-    ENDIF
-
 
     CALL_PROGLIN('PY_CIRC', 1, prog_index, FALSE)
 
@@ -775,7 +743,7 @@ BEGIN
     -- Read pose values from the cmd string
     pose = CURPOS(0, 0)
     FOR i=1 TO nj DO
-        CNV_STR_REAL(SUB_STR(cmd, 13, n_chars), pval)
+        CNV_STR_REAL(SUB_STR(cmd, start, n_chars), pval)
 
         IF i=1 THEN
             pose.x = pval
