@@ -222,6 +222,10 @@ class Robot(ABC):
             ValueError: raises if movement type is not one of ("movej", "movep")
         """
 
+        # Set mid
+
+        self.set_pr(80,mid)
+
         # prepare velocity. percentage or mm/s
         # format: aaaa, e.g.: 0001%, 0020%, 3000 mm/s
         velocity = int(velocity)
@@ -245,15 +249,6 @@ class Robot(ABC):
 
         # prepare end
         for val in end:
-            vs = f"{abs(val):013.6f}"
-            if val >= 0:
-                vs = "+" + vs
-            else:
-                vs = "-" + vs
-            cmd += f":{vs}"
-
-        # prepare mid
-        for val in mid:
             vs = f"{abs(val):013.6f}"
             if val >= 0:
                 vs = "+" + vs
