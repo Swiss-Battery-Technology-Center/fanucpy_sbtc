@@ -356,14 +356,12 @@ class Robot(ABC):
         return reg_value
     
     def get_forces(self):
-        """Gets current data from force sensor
+        cmd = "getforces"
+        _, msg = self.send_cmd(cmd)
+        return msg
+    
+    def get_sys_real(self, name):
 
-        Returns:
-            list[float]: Fx, Fy, Fz
-        """
-        
-        self.call_prog("PY_FORCE")
-        Fx = float(self.get_reg(81))
-        Fy = float(self.get_reg(82))
-        Fz = float(self.get_reg(83))
-        return [Fx,Fy,Fz]
+        cmd = f"getsysvar:{name}"
+        _, val = self.send_cmd(cmd)
+        return val

@@ -13,25 +13,11 @@ robot.connect()
 
 orientation = [0,0,0]
 
-
-
-# get robot state
-print("Current poses: ")
-cur_jpos = robot.get_curjpos()
-print(f"Current joints: {cur_jpos}")
-lpos = robot.get_lpos()
-print(f"Current lpos: {lpos}")
-
-print("Setting PR[90] to 1,2,3,...")
-robot.set_pr(90,[1,2,3,4,5,6])
-
-print(f"Getting PR[91]: {robot.get_pr(91)}")
-
-print(f"Getting R[91]: {robot.get_reg(90)}")
-
-print(robot.get_forces())
+v_max = 500
+cnt = 0
 
 # move in joint space
+
 
 robot.move(
     "pose",
@@ -45,93 +31,88 @@ robot.move(
 robot.move(
     "pose",
     vals= [200,0,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
     linear=True,
 )
 
 robot.move(
     "pose",
     vals= [200,200,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
     linear=True,
 )
-
-lpos = robot.get_lpos()
-print(f"Current lpos: {lpos}")
 
 robot.move(
     "pose",
     vals= [0,200,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
     linear=True,
 )
 
 robot.move(
     "pose",
     vals=[0,0,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
     linear=True,
 )
 
 robot.move(
     "pose",
     vals=[-100,0,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
     linear=True,
 )
 
 robot.circ(
     mid=[-71,71,0] + orientation,
     end=[0,100,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
 )
 
 robot.circ(
     mid=[71,71,0] + orientation,
     end=[100,0,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
 )
 
 robot.circ(
     mid=[71,-71,0] + orientation,
     end=[0,-100,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
 )
 
-lpos = robot.get_lpos()
-print(f"Current lpos: {lpos}")
 
 
 robot.circ(
     mid=[-71,-71,0] + orientation,
     end=[-100,0,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
 )
 
 robot.move(
     "pose",
     vals=[0,0,0] + orientation,
-    velocity=100,
+    velocity=v_max,
     acceleration=100,
-    cnt_val=0,
+    cnt_val=cnt,
     linear=True,
 )
 
