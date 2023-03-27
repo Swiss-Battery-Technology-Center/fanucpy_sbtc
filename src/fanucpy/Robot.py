@@ -356,12 +356,12 @@ class Robot(ABC):
         return reg_value
     
     def get_forces(self):
+        """Get forces value.
+
+        Returns:
+            forces: list of float [Fx, Fy, Fz].
+        """
         cmd = "getforces"
         _, msg = self.send_cmd(cmd)
-        return msg
-    
-    def get_sys_real(self, name):
-
-        cmd = f"getsysvar:{name}"
-        _, val = self.send_cmd(cmd)
-        return val
+        forces = [float(val.split("=")[1]) for val in msg.split(",")]
+        return forces
