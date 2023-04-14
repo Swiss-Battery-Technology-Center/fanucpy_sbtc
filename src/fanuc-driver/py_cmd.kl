@@ -617,6 +617,46 @@ BEGIN
 
 END SET_RDO
 
+ROUTINE SET_DO(cmd: STRING): STRING
+----------------------------------------------------
+-- Function: Sets digital out.
+-- cmd string should follow the below format:
+-- 'setdo:nn:value'
+-- n: a two digit number
+-- value: 'true' or 'false' (lowercase)
+----------------------------------------------------
+-- Arguments:
+--      cmd [IN]:           command string.
+----------------------------------------------------
+-- Return value: response string.
+----------------------------------------------------
+VAR
+    rdo_num:            INTEGER
+    rdo_val:            STRING[8]
+BEGIN
+    -- Get RDO number
+    CNV_STR_INT(SUB_STR(cmd, 7, 2), rdo_num)
+
+    -- Get RDO value
+    rdo_val = SUB_STR(cmd, 10, STR_LEN(cmd) - 9)
+
+    IF rdo_val = 'true' THEN
+        DOUT[rdo_num] = TRUE
+        resp = '0:success'
+        RETURN(resp)
+    ENDIF
+
+    IF rdo_val = 'false' THEN
+        DOUT[rdo_num] = FALSE
+        resp = '0:success'
+        RETURN(resp)
+    ENDIF
+
+    resp = '1:wrong-do-value'
+    RETURN(resp)
+
+END SET_DO
+
 ROUTINE SET_SYS_VAR(cmd: STRING): STRING
 ----------------------------------------------------
 -- Author:              Michael Yiu
@@ -932,6 +972,12 @@ BEGIN
     -- setrdo: set Robot Digital Output
     IF SUB_STR(cmd, 1, 6) = 'setrdo' THEN
         resp = SET_RDO(cmd)
+        RETURN(TRUE)
+    ENDIF
+
+    -- setdo: set Digital Output
+    IF SUB_STR(cmd, 1, 5) = 'setdo' THEN
+        resp = SET_DO(cmd)
         RETURN(TRUE)
     ENDIF
 

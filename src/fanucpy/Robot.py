@@ -299,6 +299,21 @@ class Robot(ABC):
         cmd = f"setrdo:{rdo_num}:{val}"
         self.send_cmd(cmd)
 
+    def set_do(self, do_num: int, val: bool):
+        """Sets DO value.
+
+        Args:
+            do_num (int): DO number.
+            val (bool): Value.
+        """
+        assert(do_num>0)
+        if val:
+            val = "true"
+        else:
+            val = "false"
+        cmd = f"setdo:{do_num:02}:{val}"
+        self.send_cmd(cmd)
+
     def set_sys_var_bool(self, sys_var: str, val: bool):
         """Sets system variable to True or False.
 
