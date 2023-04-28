@@ -10,8 +10,8 @@ robot = Robot(
 robot.__version__()
 
 robot.connect()
-
-orientation = [0,0,0]
+lpos = robot.get_lpos()
+orientation = lpos[3:]
 
 v_max = 500
 cnt = 0
