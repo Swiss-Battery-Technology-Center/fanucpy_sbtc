@@ -6,7 +6,10 @@ This work is fork of [Xevi8X/fanucpy_extended](https://github.com/Xevi8X/fanucpy
 ## Software contents
 The package consists of two parts: 
 1. Robot interface code written in Python programming language
-2. FANUC robot controller driver (tested with R-30iA ver. 7.70) written in KAREL and FANUC teach pendant languages
+2. FANUC robot controller driver (tested with R-30iB ver. 8.30) written in KAREL and FANUC teach pendant languages
+
+## Installation
+Follow the instrctions [here](fanuc.md). For an R-30-iB controller (V8.30), you can find the built KAREL binaries [here](./dist/).
 
 ## Usage
 ### Connect to a robot:

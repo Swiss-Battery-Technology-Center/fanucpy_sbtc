@@ -1,0 +1,1 @@
+Built for a CR-35iA robot with a R-30iB controller, version: V8.30
