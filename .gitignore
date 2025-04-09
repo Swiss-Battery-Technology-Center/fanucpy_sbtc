@@ -1,5 +1,3 @@
-# PC files
-*.pc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
