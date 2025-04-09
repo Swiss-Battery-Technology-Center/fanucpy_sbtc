@@ -1,7 +1,7 @@
 # fanucpy_extended: Python package for FANUC industrial robots with extra features
 
 ## Acknowledgements
-This work is fork of [torayeff/fanucpy](https://github.com/torayeff/fanucpy) adopt to projects creating on PAE of WUT.
+This work is fork of [Xevi8X/fanucpy_extended](https://github.com/Xevi8X/fanucpy_extended) which is itself a fork of [torayeff/fanucpy](https://github.com/torayeff/fanucpy).
 
 ## Software contents
 The package consists of two parts: 
