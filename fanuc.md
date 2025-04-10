@@ -102,3 +102,11 @@ In case of error or hanging python script:
 ![4](https://user-images.githubusercontent.com/67538561/169287126-a808bb14-61ae-4124-a4db-961fb6c7f8f7.png)
 
 2. Re-run the **MAPPDK**. 
+
+
+## Disabling the DCS (at own risk!)
+**ATTENTION:** Disabling the DCS removes the robot's safety features. This should only be done in a controlled environment where safety is ensured. Perform at your own risk! 
+
+It can, however, be extremely useful for testing purposes as it will disable any payload or force checks during motion execution. 
+
+For this, set the `$DCS_CFG.$SYS_PARAM` in the teach pendant's variables to 1, it will disable almost all of DCS. If you go to the DCS menu, it will only show your SAFE I/O connect and device, the code number setup, and the signature. Every other option will be gone. Make sure to restart after changing this setting. To enable the DCS again, set back to 0.
