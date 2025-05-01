@@ -123,18 +123,6 @@ class Robot(ABC):
         _, msg = self.send_cmd(cmd)
         vals = [float(val.split("=")[1]) for val in msg.split(",")]
         return vals
-    
-    def get_lpos(self):
-        """Gets current linear cartesian position of tool center point.
-
-        Returns:
-            list[float]: Current positions XYZWPR.
-        """
-        
-        self.call_prog("PY_POS")
-        msg = self.get_pr(85)
-        vals = [float(val.split("=")[1]) for val in msg.split(",")]
-        return vals
 
     def get_curjpos(self):
         """Gets current joint values of tool center point.
@@ -380,3 +368,49 @@ class Robot(ABC):
         _, msg = self.send_cmd(cmd)
         forces = [float(val.split("=")[1]) for val in msg.split(",")]
         return forces
+    
+    
+    def execute_joint_trajectory(
+        self, joint_trajectory: list, 
+        pr_start: int, 
+        pr_end: int,
+        velocity: int = 25, 
+        acceleration: int = 100, 
+        cnt_val: int = 0
+    ):
+        
+        # prepare velocity. percentage or mm/s
+        # format: aaaa, e.g.: 0001%, 0020%, 3000 mm/s
+        velocity = int(velocity)
+        velocity = f"{velocity:04}"
+
+        # prepare acceleration. percentage or mm/s^2
+        # format: aaaa, e.g.: 0001%, 0020%, 0100 mm/s^2
+        acceleration = int(acceleration)
+        acceleration = f"{acceleration:04}"
+
+        # prepare CNT value
+        # format: aaa, e.g.: 001, 020, 100
+        cnt_val = int(cnt_val)
+        assert 0 <= cnt_val <= 100, "Incorrect CNT value."
+        cnt_val = f"{cnt_val:03}"
+        
+        # Prepare PR values
+        pr_start = int(pr_start)
+        pr_end = int(pr_end)
+        assert 1 <= pr_start <= 100, "Incorrect PR start value."
+        assert pr_start <= pr_end <= 100, "Incorrect PR end value."
+        pr_start = f"{pr_start:03}"
+        pr_end = f"{pr_end:03}"
+        
+        motion_type = 0
+
+        # Prepare command
+        cmd = "movetraj"
+        cmd += f":{velocity}:{acceleration}:{cnt_val}:{motion_type}:{pr_start}:{pr_end}"
+
+        # call send_cmd
+        self.send_cmd(cmd)
+        
+        
+

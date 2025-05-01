@@ -4,7 +4,7 @@ import time
 
 robot = Robot(
     robot_model="Fanuc",
-    host="192.168.234.2",
+    host="192.168.25.182",
     port=18735,
 )
 

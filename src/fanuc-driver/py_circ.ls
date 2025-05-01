@@ -20,6 +20,6 @@ DEFAULT_GROUP	= 1,*,*,*,*;
 CONTROL_CODE	= 00000000 00000000;
 /MN
    1:C PR[80]    
-    :  PR[81] R[81]mm/sec CNT R[83] ACC R[82]    ;
+    :  PR[81:PY_VEL] R[81:PY_VEL]mm/sec CNT R[81:PY_CNT] ACC R[82:PY_ACC]    ;
 /POS
 /END

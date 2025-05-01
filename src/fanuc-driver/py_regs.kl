@@ -1,0 +1,12 @@
+-- REGISTERS
+    -- R[80]:           --
+    -- R[81:PY_VEL]     Velocity (% or mm/s)
+    -- R[82:PY_ACC]     Acceleration (%)
+    -- R[83:PY_CNT]     Continuity value (blending)
+    -- R[84:PY_TRJS]    Trajectory start PR
+    -- R[85:PY_TRJE]    Trajectory end PR
+    -- R[86:PY_I]       Trajectory PR iterator
+
+-- POSITION REGISTERS
+    -- PR[1] - PR[100]  All used for trajectory moves
+    -- PR[81:PY_JPOS]   Used for MOVEL and MOVEJ

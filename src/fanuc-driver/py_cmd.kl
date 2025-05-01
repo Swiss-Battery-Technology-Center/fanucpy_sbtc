@@ -516,6 +516,116 @@ BEGIN
 END CIRC
 
 
+ROUTINE MOVETRAJ(cmd: STRING): STRING
+-- Function: Executes trajectory that is already defined in PRs.
+-- cmd string should follow the below format:
+-- movep:vel_val:cnt_val:nj:X:Y:Z:W:P:R
+-- movetraj:vel_val:acc_val:cnt:val:mtn_type:pr_start:pr_:end
+-- where:
+-- vel_val: abc (3 digits), e.g.: 002, 020, 100
+-- acc_val: abc (3 digits), e.g.: 002, 020, 100
+-- cnt_val: abc (3 digits), e.g.: 003, 030, 100
+-- mtn_type: 1 (linear), else (joint)
+-- traj_start: trajectory start PR, e.g.: 001, 002, 100
+-- traj_end: trajectory end PR, e.g.: 001, 002, 100
+----------------------------------------------------
+-- Arguments:
+--      cmd [IN]:           command string.
+----------------------------------------------------
+-- Return value: response string.
+----------------------------------------------------
+VAR
+    status:             INTEGER
+    vel_val:            INTEGER
+    acc_val:            INTEGER
+    cnt_val:            INTEGER
+    mtn_type:           INTEGER
+    traj_start:         INTEGER
+    traj_end:           INTEGER
+    start:              INTEGER
+    prog_index:         INTEGER
+    resp:               STRING[254]
+
+CONST
+    n_chars = 14
+BEGIN
+    -- Registers
+    -- R[81:PY_VEL]     Velocity (% or mm/s)
+    -- R[82:PY_ACC]     Acceleration (%)
+    -- R[83:PY_CNT]     Continuity value (blending)
+    -- R[84:PY_TRJS]    Trajectory start PR
+    -- R[85:PY_TRJE]    Trajectory end PR
+    -- R[86:PY_I]       Trajectory PR iterator
+    start = 8 + 1 + 1 -- 8 = 'movetraj:'
+
+    -- Get vel_val put it to R[81]
+    CNV_STR_INT(SUB_STR(cmd, start, 4), vel_val)
+    SET_INT_REG(81, vel_val, status)
+    IF status <> 0 THEN
+        resp = '1:R[81:PY_VEL]-was-not-set'
+        WRITE('Error: ', status, CR)
+        RETURN(resp)
+    ENDIF
+    start = start + 4 + 1
+
+    -- Get acc_val and put it to R[82]
+    CNV_STR_INT(SUB_STR(cmd, start, 4), acc_val)
+    SET_INT_REG(82, acc_val, status)
+    IF status <> 0 THEN
+        resp = '1:R[82:PY_ACC]-was-not-set'
+        WRITE('Error: ', status, CR)
+        RETURN(resp)
+    ENDIF
+    start = start + 4 + 1
+
+    -- Get CNT value and put it to R[83]
+    CNV_STR_INT(SUB_STR(cmd, start, 3), cnt_val)
+    SET_INT_REG(83, cnt_val, status)
+    IF status <> 0 THEN
+        resp = '1:R[83:PY_CNT]-was-not-set'
+        WRITE('Error: ', status, CR)
+        RETURN(resp)
+    ENDIF
+    start = start + 3 + 1
+
+    -- Get the motion type 
+    CNV_STR_INT(SUB_STR(cmd, start, 1), mtn_type)
+    start = start + 1 + 1
+
+    -- Get the start index of the trajectory 
+    CNV_STR_INT(SUB_STR(cmd, start, 3), traj_start)
+    SET_INT_REG(84, traj_start, status)
+    IF status <> 0 THEN
+        resp = '1:R[84:PY_TRJS]-was-not-set'
+        WRITE('Error: ', status, CR)
+        RETURN(resp)
+    ENDIF
+    start = start + 3 + 1
+
+    -- Get the end index of the trajectory
+    CNV_STR_INT(SUB_STR(cmd, start, 3), traj_end)
+    SET_INT_REG(85, traj_end, status)
+    IF status <> 0 THEN
+        resp = '1:R[85:PY_TRJE]-was-not-set'
+        WRITE('Error: ', status, CR)
+        RETURN(resp)
+    ENDIF
+
+    -- Execute the trajectory
+    IF mtn_type = 1 THEN
+        -- linear movement
+        CALL_PROGLIN('PY_TRAJL', 1, prog_index, FALSE)
+    ELSE
+        -- joint movement
+        CALL_PROGLIN('PY_TRAJJ', 1, prog_index, FALSE)
+    ENDIF
+
+    resp = '0:success'
+    RETURN(resp)
+
+END MOVETRAJ
+
+
 ROUTINE MAPPDKCALL(cmd: STRING) : STRING
 ----------------------------------------------------
 -- Function: Calls external program.
@@ -960,6 +1070,12 @@ BEGIN
     -- circ
     IF SUB_STR(cmd, 1, 4) = 'circ' THEN
         resp = CIRC(cmd)
+        RETURN(TRUE)
+    ENDIF
+
+    -- movetraj
+    IF SUB_STR(cmd, 1, 8) = 'movetraj' THEN
+        resp = MOVETRAJ(cmd)
         RETURN(TRUE)
     ENDIF
 

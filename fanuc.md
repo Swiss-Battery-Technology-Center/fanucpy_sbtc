@@ -78,10 +78,10 @@ To setup the logger, follow the step for the FANUC MAPPDK server setup. Use **S7
 ## 4. Running MAPPDK
 1. Copy the following files to a robot controller either using USB flash drive or FTP connection:
     * **mappdk.ls**: The MAPPDK main file which should be run from the teach pendant. This file runs MAPPDK server and MAPPDK logger. Uncomment the corresponding line to disable the functioality.
-    * **mappdk_server.pc**: The MAPPDK server file.
-    * **mappdk_logger.pc**: The MAPPDK logger file.
-    * **mappdk_move.ls**: The MAPPDK move file.
-    * **mappdk_movel.ls**: The MAPPDK linear move file.
+    * **py_server.pc**: The MAPPDK server file.
+    * **py_logger.pc**: The MAPPDK logger file.
+    * **py_move.ls**: The MAPPDK move file.
+    * **py_movel.ls**: The MAPPDK linear move file.
    ![image](https://user-images.githubusercontent.com/67538561/169286670-c283a061-9c50-4e21-b844-961c014b33d1.png)
 
 2. In the teach pendant:
@@ -92,8 +92,8 @@ To setup the logger, follow the step for the FANUC MAPPDK server setup. Use **S7
 
 ## 5. Reserved registers and frames.
 * MAPPDK uses the **USER FRAME=8** and **TOOL FRAME=8**.
-* MAPPDK uses registers **R[81]** for velocity,  **R[82]** for acceleration, and **R[83]** fo continuous value.
-* MAPPDK uses position register **PR[81]** for position and joint values.
+* Consider registers R[80] - R[90] occupied.
+* Consider all position registers PR[1] - PR[100] occupied.
 
 ## 6. Troubleshooting
 In case of error or hanging python script:
