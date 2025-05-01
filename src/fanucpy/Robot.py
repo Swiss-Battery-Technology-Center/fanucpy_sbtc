@@ -344,6 +344,25 @@ class Robot(ABC):
 
         # call send_cmd
         self.send_cmd(cmd)
+        
+    def _set_joints_pr(self, pr_num:int, vals: list,):
+        cmd = f"setjpr:{pr_num:03}:{len(vals)}"
+
+        # prepare joint values
+        for val in vals:
+            vs = f"{abs(val):013.6f}"
+            if val >= 0:
+                vs = "+" + vs
+            else:
+                vs = "-" + vs
+            cmd += f":{vs}"
+
+        self.send_cmd(cmd)
+        
+    def _clear_all_joints_pr(self):
+        """Clears all PR values from RP[1] to PR[100]."""
+        cmd = "clrjpr"
+        self.send_cmd(cmd)
 
     def get_reg(self, reg_num: int):
         """Get REG value.
@@ -370,14 +389,15 @@ class Robot(ABC):
         return forces
     
     
-    def execute_joint_trajectory(
-        self, joint_trajectory: list, 
-        pr_start: int, 
+    def _execute_joint_trajectory(
+        self,
+        pr_start: int,
         pr_end: int,
-        velocity: int = 25, 
-        acceleration: int = 100, 
-        cnt_val: int = 0
-    ):
+        velocity: int, 
+        acceleration: int, 
+        cnt_val: int,
+        linear: bool
+    ) -> None:
         
         # prepare velocity. percentage or mm/s
         # format: aaaa, e.g.: 0001%, 0020%, 3000 mm/s
@@ -403,7 +423,8 @@ class Robot(ABC):
         pr_start = f"{pr_start:03}"
         pr_end = f"{pr_end:03}"
         
-        motion_type = 0
+        # Prepare motion type
+        motion_type = 1 if linear else 0
 
         # Prepare command
         cmd = "movetraj"
@@ -411,6 +432,32 @@ class Robot(ABC):
 
         # call send_cmd
         self.send_cmd(cmd)
+        
+    def joint_trajectory(
+        self,
+        joint_positions: list,
+        velocity: int = 100, 
+        acceleration: int = 100, 
+        cnt_val: int = 100,
+        linear: bool = False,
+    ) -> None:
+        
+        # Send points to robot
+        self._clear_all_joints_pr()
+        for idx, q in enumerate(joint_positions):
+            self._set_joints_pr(idx + 1, q)
+            
+        # Execute trajectory
+        self._execute_joint_trajectory(
+            pr_start=1,
+            pr_end=len(joint_positions),
+            velocity=velocity, 
+            acceleration=acceleration, 
+            cnt_val=cnt_val,
+            linear=linear
+        )
+        
+      
         
         
 

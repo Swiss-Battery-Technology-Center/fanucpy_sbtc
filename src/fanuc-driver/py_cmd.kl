@@ -131,7 +131,7 @@ ROUTINE MOVEJ(cmd: STRING): STRING
 -- vel_val: abc (3 digits), e.g.: 002, 020, 100
 -- cnt_val: abc (3 digits), e.g.: 003, 030, 100
 -- nj: n (1 digit), e.g.: 6, 7
--- J1: (18 chars), e.g.: +1234567890.09876543216
+-- J1: (14 chars), e.g.: +123456.098765
 -- J2 ... Jn are similar to J1
 ----------------------------------------------------
 -- Arguments:
@@ -255,7 +255,7 @@ ROUTINE MOVEP(cmd: STRING): STRING
 -- vel_val: abc (3 digits), e.g.: 002, 020, 100
 -- cnt_val: abc (3 digits), e.g.: 003, 030, 100
 -- nj: n (1 digit), nj = 6
--- X: (18 chars), e.g.: +1234567890.0987654321
+-- X: (14 chars), e.g.: +123456.098765
 -- Y, Z, W, P, R are similar to J1
 ----------------------------------------------------
 -- Arguments:
@@ -545,9 +545,6 @@ VAR
     start:              INTEGER
     prog_index:         INTEGER
     resp:               STRING[254]
-
-CONST
-    n_chars = 14
 BEGIN
     -- Registers
     -- R[81:PY_VEL]     Velocity (% or mm/s)
@@ -612,6 +609,7 @@ BEGIN
     ENDIF
 
     -- Execute the trajectory
+    WRITE('Executing trajectory from PR', traj_start, ' to PR', traj_end, CR)
     IF mtn_type = 1 THEN
         -- linear movement
         CALL_PROGLIN('PY_TRAJL', 1, prog_index, FALSE)
@@ -619,6 +617,8 @@ BEGIN
         -- joint movement
         CALL_PROGLIN('PY_TRAJJ', 1, prog_index, FALSE)
     ENDIF
+
+    WRITE('Trajectory executed!', CR)
 
     resp = '0:success'
     RETURN(resp)
@@ -859,6 +859,100 @@ BEGIN
     RETURN(resp)
 END GET_PR
 
+
+ROUTINE SET_JPR(cmd: STRING): STRING
+----------------------------------------------------
+-- setjpr:nj:J1:J2:J3:J4:J5:J6
+-- where:
+-- nj: n (1 digit), e.g.: 6, 7
+-- J1: (14 chars), e.g.: +123456.098765
+-- J2 ... Jn are similar to J1
+VAR
+    pr_num:             INTEGER
+    nj:                 INTEGER
+    i:                  INTEGER
+    joint_vals:         ARRAY[9] OF REAL
+    joint_val:          REAL
+    joint_pos:          JOINTPOS6
+    start:              INTEGER
+    status:             INTEGER
+    resp:               STRING[254]
+CONST
+    n_chars = 14
+BEGIN
+    start =  8 -- 'setjpr:' = 6 + 1 + 1 
+
+    -- Get PR number
+    CNV_STR_INT(SUB_STR(cmd, start, 3), pr_num)
+
+    IF pr_num < 1  THEN
+        resp = '1:PR-number-too-small'
+        RETURN(resp)
+    ENDIF
+    IF pr_num > 100 THEN
+        resp = '1:PR-number-too-big'
+        RETURN(resp)
+    ENDIF
+    start = start + 3 + 1
+
+    -- Get the number of joints of robot
+    CNV_STR_INT(SUB_STR(cmd, start, 1), nj)
+    IF nj < 1 THEN
+        resp = '1:joint-number-too-small'
+        RETURN(resp)
+    ENDIF
+    IF nj > 9 THEN
+        resp = '1:joint-number-too-big'
+        RETURN(resp)
+    ENDIF
+    start = start + 1 + 1
+
+    -- Read joint values from the cmd string
+    FOR i=1 TO nj DO
+        CNV_STR_REAL(SUB_STR(cmd, start, n_chars), joint_val)
+        joint_vals[i] = joint_val
+        start = start + n_chars + 1
+    ENDFOR
+
+    -- Save joint positions to register
+    CNV_REL_JPOS(joint_vals, joint_pos, status)
+    SET_JPOS_REG(pr_num, joint_pos , status)
+    IF status <> 0 THEN
+        resp = '1:PR[]-was-not-set'
+        RETURN(resp)
+    ENDIF
+    WRITE('Joint positions written to PR[', pr_num, ' ]', CR)
+
+    resp = '0:success'
+    RETURN(resp)
+
+END SET_JPR
+
+
+ROUTINE CLR_JPR(cmd: STRING): STRING
+----------------------------------------------------
+-- clearjpr
+----------------------------------------------------
+VAR
+    i:                  INTEGER
+    status:             INTEGER
+    resp:               STRING[254]
+BEGIN
+    FOR i = 1 TO 100 DO
+        CLR_POS_REG(i, 0 , status)
+        IF status <> 0 THEN
+            resp = '1:could-not-clear-PR[]'
+            RETURN(resp)
+        ENDIF
+    ENDFOR
+    WRITE('JPOS registers cleared!',CR)
+
+    resp = '0:success'
+    RETURN(resp)
+
+END CLR_JPR
+
+
 ROUTINE SET_PR(cmd: STRING): STRING
 ----------------------------------------------------
 -- Function: Sets robot digital out.
@@ -1032,6 +1126,7 @@ ROUTINE HANDLE_CMD(cmd: STRING;
 ----------------------------------------------------
 BEGIN
     WRITE(cmd, CR)
+
     IF cmd = 'exit' THEN
         resp = '0:success'
         RETURN(FALSE)
@@ -1115,6 +1210,18 @@ BEGIN
         RETURN(TRUE)
     ENDIF
 
+    -- setjpr: set Joint Position Register
+    IF SUB_STR(cmd, 1, 6) = 'setjpr' THEN
+        resp = SET_JPR(cmd)
+        RETURN(TRUE)
+    ENDIF
+
+    -- clrjpr: clear Joint Position Registers
+    IF SUB_STR(cmd, 1, 6) = 'clrjpr' THEN
+        resp = CLR_JPR(cmd)
+        RETURN(TRUE)
+    ENDIF
+
     -- getpr: get Position Register
     IF SUB_STR(cmd, 1, 5) = 'getpr' THEN
         resp = GET_PR(cmd)
@@ -1129,7 +1236,7 @@ BEGIN
     
     -- getforces: get force sensor data
     IF SUB_STR(cmd, 1, 9) = 'getforces' THEN
-        resp =GET_FORCES(cmd)
+        resp = GET_FORCES(cmd)
         RETURN(TRUE)
     ENDIF
 
