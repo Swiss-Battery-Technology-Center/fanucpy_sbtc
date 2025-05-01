@@ -5,13 +5,13 @@ from threading import Thread, Event
 
 robot = Robot(
     robot_model="Fanuc",
-    host="192.168.25.182",
+    host="192.168.29.240",
     port=18735,
 )
 
 logger = Robot(
     robot_model="Fanuc",
-    host="192.168.25.182",
+    host="192.168.29.240",
     port=18736,
 )
 
@@ -25,7 +25,7 @@ logger.connect()
 def stream_jpos():
     while not logger_stop_event.is_set():
         q = logger.get_curjpos()
-        print(q)
+        # print(q)
         time.sleep(0.1)
 
 logger_thread = Thread(target=stream_jpos)
@@ -38,7 +38,7 @@ print("Home position:", q_home)
 
 # Trajectory settings
 n_points = 100
-amplitude_deg = 10
+amplitude_deg = 15
 amplitude_rad = np.deg2rad(amplitude_deg)  # if needed for radians
 frequencies = np.array([0.5, 0.8, 1.1, 1.4, 1.7, 2.0]) 
 
