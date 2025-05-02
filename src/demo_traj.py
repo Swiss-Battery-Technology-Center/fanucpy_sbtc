@@ -5,13 +5,13 @@ from threading import Thread, Event
 
 robot = Robot(
     robot_model="Fanuc",
-    host="192.168.25.182",
+    host="127.0.0.1",
     port=18735,
 )
 
 logger = Robot(
     robot_model="Fanuc",
-    host="192.168.25.182",
+    host="127.0.0.1",
     port=18736,
 )
 
@@ -26,7 +26,7 @@ def stream_jpos():
     while not logger_stop_event.is_set():
         q = logger.get_curjpos()
         print(q)
-        time.sleep(0.1)
+        time.sleep(1)
 
 logger_thread = Thread(target=stream_jpos)
 logger_thread.start()

@@ -553,8 +553,11 @@ BEGIN
     -- R[84:PY_TRJS]    Trajectory start PR
     -- R[85:PY_TRJE]    Trajectory end PR
     -- R[86:PY_I]       Trajectory PR iterator
+    -- R[87:PY_TRJF]    Trajectory PR filled
     start = 8 + 1 + 1 -- 8 = 'movetraj:'
 
+	FLG[81] = FALSE
+	
     -- Get vel_val put it to R[81]
     CNV_STR_INT(SUB_STR(cmd, start, 4), vel_val)
     SET_INT_REG(81, vel_val, status)
@@ -612,13 +615,16 @@ BEGIN
     WRITE('Executing trajectory from PR', traj_start, ' to PR', traj_end, CR)
     IF mtn_type = 1 THEN
         -- linear movement
-        CALL_PROGLIN('PY_TRAJL', 1, prog_index, FALSE)
+       -- CALL_PROGLIN('PY_TRAJL', 1, prog_index, FALSE)
     ELSE
         -- joint movement
-        CALL_PROGLIN('PY_TRAJJ', 1, prog_index, FALSE)
+        --CALL_PROGLIN('PY_TRAJJ', 1, prog_index, FALSE)
     ENDIF
+    
+    -- Ready for execution
+    FLG[81] = TRUE
 
-    WRITE('Trajectory executed!', CR)
+    WRITE('Trajectory executing!', CR)
 
     resp = '0:success'
     RETURN(resp)
@@ -923,6 +929,9 @@ BEGIN
     ENDIF
     WRITE('Joint positions written to PR[', pr_num, ' ]', CR)
 
+    -- Indicate that PR[pr_num] is filled by setting R[87] = pr_num
+    SET_INT_REG(87, pr_num, status)
+
     resp = '0:success'
     RETURN(resp)
 
@@ -938,6 +947,10 @@ VAR
     status:             INTEGER
     resp:               STRING[254]
 BEGIN
+    -- Clear traj movement flag
+    FLG[81] = FALSE
+
+    -- Clear all PRs
     FOR i = 1 TO 100 DO
         CLR_POS_REG(i, 0 , status)
         IF status <> 0 THEN

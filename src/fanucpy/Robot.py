@@ -2,6 +2,8 @@ from abc import ABC
 import socket
 import sys
 
+import time
+
 
 class Robot(ABC):
     def __init__(
@@ -442,10 +444,14 @@ class Robot(ABC):
         linear: bool = False,
     ) -> None:
         
+        buffer_size = 5
+        
         # Send points to robot
         self._clear_all_joints_pr()
-        for idx, q in enumerate(joint_positions):
-            self._set_joints_pr(idx + 1, q)
+        
+        for idx in range(0, buffer_size):
+            q = joint_positions[idx]
+            self._set_joints_pr(idx+1, q)
             
         # Execute trajectory
         self._execute_joint_trajectory(
@@ -456,6 +462,13 @@ class Robot(ABC):
             cnt_val=cnt_val,
             linear=linear
         )
+        
+        for idx in range(buffer_size, len(joint_positions)):
+            q = joint_positions[idx]
+            self._set_joints_pr(idx+1, q)
+            time.sleep(0.1)
+        
+
         
       
         
