@@ -10,3 +10,7 @@
 -- POSITION REGISTERS
     -- PR[1] - PR[100]  All used for trajectory moves
     -- PR[81:PY_JPOS]   Used for MOVEL and MOVEJ
+
+-- FLAGS
+    -- F[81]:           If set, a new trajectory is available
+    -- F[82]:           If set, the trjaectory segments are linear

@@ -361,9 +361,9 @@ class Robot(ABC):
 
         self.send_cmd(cmd)
         
-    def _clear_all_joints_pr(self):
-        """Clears all PR values from RP[1] to PR[100]."""
-        cmd = "clrjpr"
+    def _clear_trajectory(self):
+        """Clears all PR values from RP[1] to PR[100] and trajectory-related variables."""
+        cmd = "clrtraj"
         self.send_cmd(cmd)
 
     def get_reg(self, reg_num: int):
@@ -442,18 +442,17 @@ class Robot(ABC):
         acceleration: int = 100, 
         cnt_val: int = 100,
         linear: bool = False,
+        send_buffer_size: int = 5,
     ) -> None:
+                
+        self._clear_trajectory()
         
-        buffer_size = 5
-        
-        # Send points to robot
-        self._clear_all_joints_pr()
-        
-        for idx in range(0, buffer_size):
+        # Send first few points to robot 
+        for idx in range(0, send_buffer_size):
             q = joint_positions[idx]
             self._set_joints_pr(idx+1, q)
             
-        # Execute trajectory
+        # Trigger execution of trajectory
         self._execute_joint_trajectory(
             pr_start=1,
             pr_end=len(joint_positions),
@@ -463,10 +462,11 @@ class Robot(ABC):
             linear=linear
         )
         
-        for idx in range(buffer_size, len(joint_positions)):
+        # Send remaining points to robot
+        # If the points arrive too late, the robot slows down!
+        for idx in range(send_buffer_size, len(joint_positions)):
             q = joint_positions[idx]
             self._set_joints_pr(idx+1, q)
-            time.sleep(0.1)
         
 
         

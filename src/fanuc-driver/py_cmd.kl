@@ -591,6 +591,13 @@ BEGIN
     -- Get the motion type 
     CNV_STR_INT(SUB_STR(cmd, start, 1), mtn_type)
     start = start + 1 + 1
+    IF mtn_type = 1 THEN
+        -- linear movement
+        FLG[82] = TRUE
+    ELSE
+        -- joint movement
+        FLG[82] = FALSE
+    ENDIF
 
     -- Get the start index of the trajectory 
     CNV_STR_INT(SUB_STR(cmd, start, 3), traj_start)
@@ -613,18 +620,7 @@ BEGIN
 
     -- Execute the trajectory
     WRITE('Executing trajectory from PR', traj_start, ' to PR', traj_end, CR)
-    IF mtn_type = 1 THEN
-        -- linear movement
-       -- CALL_PROGLIN('PY_TRAJL', 1, prog_index, FALSE)
-    ELSE
-        -- joint movement
-        --CALL_PROGLIN('PY_TRAJJ', 1, prog_index, FALSE)
-    ENDIF
-    
-    -- Ready for execution
     FLG[81] = TRUE
-
-    WRITE('Trajectory executing!', CR)
 
     resp = '0:success'
     RETURN(resp)
@@ -938,7 +934,7 @@ BEGIN
 END SET_JPR
 
 
-ROUTINE CLR_JPR(cmd: STRING): STRING
+ROUTINE CLR_TRAJ(cmd: STRING): STRING
 ----------------------------------------------------
 -- clearjpr
 ----------------------------------------------------
@@ -950,6 +946,20 @@ BEGIN
     -- Clear traj movement flag
     FLG[81] = FALSE
 
+    -- Reset trajectors iterator and PR indicator
+    SET_INT_REG(86, 0, status)
+    IF status <> 0 THEN
+        resp = '1:could-not-reset-PR-iterator'
+        RETURN(resp)
+    ENDIF
+
+
+    SET_INT_REG(87, 0, status)
+    IF status <> 0 THEN
+        resp = '1:could-not-reset-PR-indicator'
+        RETURN(resp)
+    ENDIF
+
     -- Clear all PRs
     FOR i = 1 TO 100 DO
         CLR_POS_REG(i, 0 , status)
@@ -958,12 +968,12 @@ BEGIN
             RETURN(resp)
         ENDIF
     ENDFOR
-    WRITE('JPOS registers cleared!',CR)
+    WRITE('Trajectory registers/variables cleared!', CR)
 
     resp = '0:success'
     RETURN(resp)
 
-END CLR_JPR
+END CLR_TRAJ
 
 
 ROUTINE SET_PR(cmd: STRING): STRING
@@ -1230,8 +1240,8 @@ BEGIN
     ENDIF
 
     -- clrjpr: clear Joint Position Registers
-    IF SUB_STR(cmd, 1, 6) = 'clrjpr' THEN
-        resp = CLR_JPR(cmd)
+    IF SUB_STR(cmd, 1, 7) = 'clrtraj' THEN
+        resp = CLR_TRAJ(cmd)
         RETURN(TRUE)
     ENDIF
 

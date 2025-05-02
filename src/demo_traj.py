@@ -3,15 +3,18 @@ from fanucpy import Robot
 import time
 from threading import Thread, Event
 
+ROBO_IP = "192.168.29.240"
+# ROBO_IP = "127.0.0.1"
+
 robot = Robot(
     robot_model="Fanuc",
-    host="127.0.0.1",
+    host=ROBO_IP,
     port=18735,
 )
 
 logger = Robot(
     robot_model="Fanuc",
-    host="127.0.0.1",
+    host=ROBO_IP,
     port=18736,
 )
 
@@ -38,7 +41,7 @@ print("Home position:", q_home)
 
 # Trajectory settings
 n_points = 100
-amplitude_deg = 10
+amplitude_deg = 5
 amplitude_rad = np.deg2rad(amplitude_deg)  # if needed for radians
 frequencies = np.array([0.5, 0.8, 1.1, 1.4, 1.7, 2.0]) 
 
